@@ -28,12 +28,12 @@ def meann(deq):
         y2.append(i[3])
     return (int(sum(x1)/len(x1)),int(sum(y1)/len(x1)),int(sum(x2)/len(y2)),int(sum(y2)/len(x1)))
 
-def runner():
+def runner(args):
 
 
     obj=extremepoints()
     obj2=merge()
-    deq=deque(maxlen=10)
+    deq=deque(maxlen=3)
     cap=cv2.VideoCapture(args.input)
     ret,frame=cap.read()
     h,w,c=frame.shape
@@ -45,34 +45,45 @@ def runner():
         img=cv2.imread("temp/img.png",1)
         mask=cv2.imread("temp/mask.png",0)
         ret,frame=cap.read()
+        #cv2.imshow("img",img)
+        #cv2.imshow("mask",mask)
+        #cv2.waitKey(0)
         #mask2=np.zeros((h,w,3))
         frame=cv2.resize(frame,(w,h))
 
         p1,p2=obj.getCoordinates(frame)
-        x1,y1=p1
-        x2,y2=p2
-        deq.append((x1,y1,x2,y2))
-        x1,y1,x2,y2=meann(deq)
-        #cv2.rectangle(frame,(x1,y1),(x2,y2),(255,0,0),2)
-        width=x2-x1
-        height=y2-y1
-        img=cv2.resize(img,(width,height))
-        mask=cv2.resize(mask,(width,height))
-        mask_inv=cv2.bitwise_not(mask)
-        background=frame[y1:y2,x1:x2]
+        if(p1 is not None):
+            x1,y1=p1
+            x2,y2=p2
 
-        onlybackground=np.float32(cv2.bitwise_and(background,background,mask=mask_inv))/255.0
-        onlyforeground=np.float32(cv2.bitwise_and(img,img,mask=mask))/255.0
-        mask=np.float32(mask)/255.0
+            deq.append((x1,y1,x2,y2))
+            x1,y1,x2,y2=meann(deq)
+            #cv2.rectangle(frame,(x1,y1),(x2,y2),(255,0,0),2)
 
-        mask=mask.reshape((height,width,1))
-        combined=mask*onlyforeground+onlybackground*(1-mask)
-        combined=np.uint8(255*combined)
-        mask=np.uint8(mask*255)
-        h2,w2,_=mask.shape
-        output = cv2.seamlessClone(combined, background, mask, (int(w2/2),int(h2/2)), cv2.NORMAL_CLONE)
+            width=x2-x1
+            height=y2-y1
+            #print(width,height)
+            try:
+                img=cv2.resize(img,(width,height))
+                mask=cv2.resize(mask,(width,height))
+                mask_inv=cv2.bitwise_not(mask)
+                background=frame[y1:y2,x1:x2]
+                #print(background.shape,mask.shape)
+                onlybackground=np.float32(cv2.bitwise_and(background,background,mask=mask_inv))/255.0
+                onlyforeground=np.float32(cv2.bitwise_and(img,img,mask=mask))/255.0
+                mask=np.float32(mask)/255.0
 
-        frame[y1:y2,x1:x2]=output
+                mask=mask.reshape((height,width,1))
+                combined=mask*onlyforeground+onlybackground*(1-mask)
+                combined=np.uint8(255*combined)
+                mask=np.uint8(mask*255)
+                h2,w2,_=mask.shape
+                output = cv2.seamlessClone(combined, background, mask, (int(w2/2),int(h2/2)), cv2.NORMAL_CLONE)
+
+                frame[y1:y2,x1:x2]=output
+            except:
+                pass
+        cv2.imshow("frame",frame)
         #frame=obj2.merg(frame)
         #frame=hisEqulColor(frame)
         out.write(frame)
@@ -85,6 +96,8 @@ def runner():
 
 if __name__ =="__main__":
     parser=argparse.ArgumentParser()
-    parser.add_argument("-img","--image",help="give path to your photo")
+    parser.add_argument("-inp","--input",help="give path to your photo")
+    parser.add_argument("-out","--output",help="give path to your photo")
+
     args=parser.parse_args()
     runner(args)

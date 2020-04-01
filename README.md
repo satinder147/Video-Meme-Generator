@@ -11,6 +11,7 @@ A small application for swapping your friend face with face in a music video(Str
 # How to run
 * Install all the required dependencies using 
 ``` conda env create -f tf.yml```
+* Download dlib landmark detection file and portrait segmentation model from @anilsathyan repository(linked below)
 * chmod 777 execute
 * ./execute -img {img path} -inp {video path} -out {output video file name}
 

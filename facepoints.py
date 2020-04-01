@@ -21,7 +21,7 @@ class extremepoints:
             right=landmarks.part(16).x,landmarks.part(16).y
 
             return (int(left[0]*0.85),int(top[1]*0.8)),(int(right[0]*1.1),bottom[1])
-        return (0,0),(0,0)
+        return None,None
 
 if __name__=="__main__":
     cap=cv2.VideoCapture(0)
